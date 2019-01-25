@@ -1,0 +1,35 @@
+************** PRE-FIT INFORMATION **************
+
+NFREQ = 24, NEXCLUDED = 5, NFREEPARAMS = 7
+NWALKERS = 200, NSTEPS = 2000, NBURNIN = 1000
+NTHREADS = 8, PREFIT_USING_LEAST_SQ = FALSE
+COMPONENTS = FREEFREE(x1) AME(x1) THERMALDUST(x1)
+
+
+************** POST-FIT INFORMATION *************
+
+ACCEPTANCE = 46.9%, MCMC_TIME = 32.7s [82 us/step]
+WALKERS_KEPT = 200/200 [100.0%], RED_CHI_SQ = 8.7
+FITTED PARAMETERS =
+|    EM = 1187.39 ± 42.73 (3.6%)
+|    A_AME = 18.09 ± 1.20 (6.6%)
+|    nu_AME = 24.07 ± 0.44 (1.8%)
+|    W_AME = 0.45 ± 0.03 (7.0%)
+|    T_d = 17.67 ± 0.45 (2.5%)
+|    tau = -2.59 ± 0.03 (1.2%)
+|    beta = 1.59 ± 0.02 (1.3%)
+
+
+************** PLOTTING INFORMATION *************
+
+SED_PLOT_SAVED = TRUE, TIME_TAKEN = 1s
+WALKERS_PLOT_SAVED = TRUE, TIME_TAKEN = 7s
+CORNER_PLOT_SAVED = TRUE, TIME_TAKEN = 17s
+Saved in /scratch/nas_falcon/scratch/rca/projects/AMI/results
+
+
+************** RESULTS SAVED! *************
+
+Saved as MCMC_2019Jan25_151051.txt in
+/scratch/nas_falcon/scratch/rca/projects/AMI/results
+Program finished with a runtime of 58s!
