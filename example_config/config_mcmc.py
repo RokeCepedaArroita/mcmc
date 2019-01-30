@@ -79,8 +79,8 @@ settings = {'name': 'MCMC',  # name with which your results and figures will sta
             # Plotting Settings
             # TODO: add finer plotting control
 
-            'plotting': {'resultdir': 'results',      # results save directory, relative to current path
-                         'plotdir': 'results',        # figure save directory, relative to current path
+            'plotting': {'resultdir': '/scratch/nas_falcon/scratch/rca/projects/',      # results save directory
+                         'plotdir': '/scratch/nas_falcon/scratch/rca/projects/',        # figure save directory
                          'plotSED': False,             # save SED plot
                          'plotCorner': False,          # save corner plot
                          'plotWalkers': False,         # save walkers plot
