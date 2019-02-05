@@ -529,7 +529,7 @@ class SED():
         # Instead we throw walkers with a tunable percentage standard deviation of less than self.settings['MCMC']['stuck_threshold']%. For example, 0.001%.
         # This stuck walker will also be reflected in every other parameter, so there is no point in checking every single parameter, but the first one.
 
-        self.model['walkers']['kept'] = np.where(np.multiply(walker_nanstd,mean_walker_value) > self.settings['MCMC']['stuck_threshold'])
+        self.model['walkers']['kept'] = np.where(np.divide(walker_nanstd,mean_walker_value) > self.settings['MCMC']['stuck_threshold'])
         self.model['walkers']['percent_kept'] = np.divide(float(len(self.model['walkers']['kept'][0])),self.settings['MCMC']['nwalkers'])*1e2
 
 
