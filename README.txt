@@ -1,6 +1,9 @@
 STRUCTURE ***
-
 The main script is mcmc.py, which is a function that uses all the tools in tools.py and the emission models in emission.py
+
+
+DEPENCENCIES ***
+emcee, healpy, numpy, datetime, time, sys, inspect, multiprocessing, warnings, lmfit, matplotlib, corner, os
 
 
 3-STEP MCMC GUIDE ***
@@ -9,7 +12,6 @@ The main script is mcmc.py, which is a function that uses all the tools in tools
 Then configure this dummy configuration file with your own preferences.
 
 2. In your separate working folder, import the mcmc module into your script by using:
-
 "import sys
 sys.path.insert(0, mcmc_folder)
 import mcmc, emission, tools"

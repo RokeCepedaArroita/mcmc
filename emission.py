@@ -106,6 +106,65 @@ def cmb(nu, beam, dT):
 
 
 
+# Clive's Thermal Dust Curve. As far as I know it is the same as thermaldust above!
+
+def thermal_dust_clive(nu, beam, thermaldust_amp, thermaldust_index, thermaldust_temp):
+
+    c = 299792458.
+    k = 1.3806488e-23
+    h = 6.62606957e-34
+    dust_optical_depth_freq = 1198.8
+
+    nu = np.array(nu)
+    nu_9 = np.multiply(nu,1e9)
+    
+    xx = np.multiply(h,nu_9)/np.multiply(k,thermaldust_temp)
+    dust_norm = (nu/dust_optical_depth_freq)**thermaldust_index
+    nu_over_c = (nu_9**3)/(c**2)
+    bbody = 1/(np.exp(xx)-1)
+    thermaldust=2*h*bbody*nu_over_c*dust_norm
+    S = thermaldust_amp*thermaldust*beam*1e26
+
+    return S
+
+
+
+#Free-Free Emission with Optically Thick Downturn
+
+def freefree_optically_thick(nu, beam, EM):
+
+   
+
+    T_e = 8000 # fixed electron temperature
+
+    c = 299792458.
+    k = 1.3806488e-23
+    h = 6.62606957e-34
+    
+    import math
+    import numpy as np
+    nu = np.array(nu)
+
+    part_1 = np.power(T_e/10000,(-3/2))
+    part_2 = np.log(1*nu*part_1)
+    part_3 = (np.sqrt(3)/math.pi)*part_2
+    part_4 = 5.960-part_3
+    part_5 = np.exp(part_4)+2.71828
+    g_ff = np.log(part_5)
+
+ 
+    tau_ff = (5.468*(10**-2))*(T_e**-1.5)*(nu**-2)*EM*g_ff
+   
+    T_ff = T_e*(1. - np.exp(-tau_ff))
+    #smalltau = np.where(tau_ff <  1.0e-10)[0]
+    #'if (smalltau[0] > 0):
+    #    T_ff[smalltau] = T_e * (tau_ff[smalltau] - (-tau_ff[smalltau]**2)/2 - (-tau_ff[smalltau]**3)/6)
+    S = 2. * k * beam * np.power(np.multiply(nu,1e9),2)*T_ff*1e26 / c**2
+    
+    return S
+
+
+
 # Add Your Custom Model!
 
 def custom_model(nu, beam, variable1, variable2, add_your_own_variables):

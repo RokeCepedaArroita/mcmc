@@ -7,7 +7,9 @@ Settings are set in your mcmc_config.py file
 Example usage:
 mcmc_data, mcmc_model, mcmc_settings = mcmc.mcmc(nu, flux, flux_err, beam=0.00034421768435898063, excluded=[100, 217, 4997])
 
-Version 1.01 [Jan 2019]
+NOTE: the 'beam' is the solid angle in steradians of the source's primary aperture!
+
+Version 1.02 [Feb 2019]
 Roke Cepeda-Arroita
 roke.cepeda-arroita@manchester.ac.uk
 '''
@@ -29,7 +31,7 @@ def mcmc(nu, flux, flux_err, beam, excluded):
     data = {'nu': [],               # frequencies in GHz
     		'flux': [],             # fluxes in Jy
     		'flux_err': [],         # flux uncertainties in Jy
-    		'beam': [],             # beam size in sr
+    		'beam': [],             # solid angle of the source's primary aperture in sr!
             'excluded': [],         # list of frequencies in GHz plotted but not fitted
             'nu_fitted': [],        # non excluded frequencies in GHz
             'flux_fitted': [],      # non-excluded fluxes in Jy

@@ -1,4 +1,4 @@
-''' sed_tools.py:
+''' tools.py:
 Class and function definitions
 '''
 
@@ -52,6 +52,7 @@ class SED():
                             'sed_time': [],           # time taken to plot SED
                             'walker_time': [],        # time taken to plot walkers
                             'corner_time': [],        # time taken to plot corner figure
+                            'ls_sq_time': [],         # time taken to prefit using lmfit
                             'start': [],              # start time
                             'finish': [],             # finish time
                             'runtime': [],            # total runtime
@@ -158,7 +159,7 @@ class SED():
 
         # Initialise guesses as ones
 
-        self.model['sed_guess'] = np.ones(np.size(self.model['sed_names']))
+        self.model['sed_guess'] = np.full(shape=np.size(self.model['sed_names']), fill_value=1.)
 
         # Copy priors from self.settings to self.model
 
@@ -363,34 +364,104 @@ class SED():
 
         def ls_initialisation(self): # TODO: massively improve this initialisation step
             '''
-            Fit using least-squares to initialise positions
+            Fit using lmfit least-squares fitting to initialise positions
             If outside priors then go back to defaults in config
+            If you don't have lmfit use 'pip install lmfit' or
+            'conda install -c conda-forge lmfit' if you are on Anaconda
             '''
 
+            import time
 
-            import warnings
-            with warnings.catch_warnings(): # turn off annoying emcee scipy warnings
-                warnings.simplefilter("ignore")
-
-                # Fit using least squares
-
-                import scipy.optimize as op
-                nll = lambda *args: lnlike(*args)
-
-                result = op.minimize(nll, self.model['sed_guess'], args=(self.data['nu_fitted'], self.data['flux_fitted'], self.data['flux_err_fitted']))
+            time0 = time.time() # start time
 
 
-            # Copy Results to Current Parameter Values
+            from lmfit import minimize, Parameters, Parameter,fit_report, Minimizer
 
-            self.model['sed_params'] = result["x"]
 
-            # If results are within priors, copy them
+            # Attempt to pre-fit using lmfit
 
-            all_within_priors = self.check_priors()
-            if not all_within_priors: # if priors not satisfied
-                self.model['sed_params'] = self.model['sed_guess'] # revert back to initial guesses
+
+            try:
+
+                # Add parameters one my one
+
+                lm_param = Parameters()
+
+                for param_name, prior, guess in zip(self.model['sed_names'],self.model['sed_priors'], self.model['sed_guess']):
+                    lm_param.add(param_name, guess, vary=True, min=prior[0],max=prior[1])
+
+
+                # Define error and residual functions
+
+                def Error(lm_param, nu, flux, flux_err):
+
+                    # Convert to numpy arrays
+                    nu = np.array(nu)
+                    flux = np.array(flux)
+                    flux_err = np.array(flux_err)
+
+                    # Extract current parameters from lmfit object lm_param
+                    current_params = [x for x in lm_param.valuesdict().values()]
+
+                    # Evaluate model
+                    model = self.model['sed_model'](nu, self.data['beam'], current_params)
+
+                    return ((model-flux)*(1./flux_err))**2
+
+                def Residual(r):
+                    return np.sum(r.dot(r.T))
+
+
+                # Fit the function
+
+                fitter = Minimizer(Error,lm_param, reduce_fcn=Residual,fcn_args=(self.data['nu_fitted'],
+                    self.data['flux_fitted'], self.data['flux_err_fitted']))
+
+                lmfit_results = fitter.minimize(method='leastsq')#
+
+
+                # Extract resulting parameters
+
+                lmfit_params = [x for x in lmfit_results.params.valuesdict().values()]
+
+
+                # Copy Results to Current Parameter Values
+
+                self.model['sed_params'] = lmfit_params
+
+
+                # Timing information
+
+                time1 = time.time() # stop time
+                self.model['timing']['ls_sq_time'] = time1-time0
+
+
+                # If results are within priors, copy them to guesses!
+                # It is the parameters that going to be used to initialise the MCMC walkers after all
+
+                all_within_priors = self.check_priors()
+                if not all_within_priors: # if priors not satisfied by lmfit results
+                    self.model['sed_params'] = self.model['sed_guess'] # revert back to initial guesses
+                    print('*************** LEAST-SQUARES INFO **************')
+                    print('Could not initialise using least squares since')
+                    print('your least-squares results are outside your priors.')
+                    print('The original guesses will be passed to MCMC instead.\n')
+
+                elif all_within_priors:
+                    print('*************** LEAST-SQUARES INFO **************')
+                    print('Succesfully initialised guesses in {0:.1f} seconds!\n'.format(self.model['timing']['ls_sq_time']))
+
+
+            except:  # If lmfit fails
+                print('*************** LEAST-SQUARES INFO **************')
+                print('Could not initialise using least squares since a')
+                print('general lmfit error occurred (e.g. poor data/models).')
+                print('The original guesses will be passed to MCMC instead.\n')
+
 
             return
+
+
 
 
 
@@ -405,7 +476,7 @@ class SED():
         ndim = len(self.model['sed_params'])
 
 
-        # Initialise and Randomise Walker Positions Using a X% Gaussian Ball
+        # Initialise and Randomise Walker Positions Using an X% Gaussian Ball
 
         pos = [self.model['sed_params'] + self.settings['MCMC']['randomisation']*1e-2*np.random.randn(ndim) for i in range(self.settings['MCMC']['nwalkers'])]
 
