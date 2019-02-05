@@ -18,10 +18,13 @@ class SED():
         self.data = data # this is your SED to fit: nu, flux, flux_error, beam, excluded freq
         self.settings = settings # configuration file: mcmc, components, plotting and verbose
 
+        if isinstance(self.data['source_name'], type(None)): # if source name not directly set, copy name in settings
+            self.data['source_name'] = self.settings['source_name']
+
 
         # Total SED model parameters: components and free parameters
 
-        self.model = {'sed_model': [],              # total SED model, which is a superposition of all components
+        self.model = {'sed_model': [],         # total SED model, which is a superposition of all components
                  'sed_params': [],             # values of free-parameters in an array
                  'sed_names': [],              # names of free parameters in an array
                  'sed_names_latex': [],        # names of free parameters in LaTeX format
@@ -591,10 +594,15 @@ class SED():
         Saves results to ASCII text file
         '''
 
+        # Build name of Save File
 
-        # Build Name of Save File
-
-        save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'.txt'
+        if not isinstance(self.data['source_name'], type(None)): # if source name is defined save to own directory
+            import os   # Make source-specific directory
+            if not os.path.exists('{}/{}'.format(self.settings['plotting']['resultdir'],self.data['source_name'])):
+                os.makedirs('{}/{}'.format(self.settings['plotting']['resultdir'],self.data['source_name']))
+            save_name = str(self.data['source_name'])+'/'+self.settings['name']+'_'+str(self.data['source_name'])+'_'+self.model['timing']['timestamp']+'.txt'
+        else: # if it is not defined, save it to the main directory
+            save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'.txt'
 
 
         # Record Timing Info
@@ -715,7 +723,13 @@ class SED():
 
             # Build Name of Save File
 
-            save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_SED.png'
+            if not isinstance(self.data['source_name'], type(None)): # if source name is defined save to own directory
+                import os   # Make source-specific directory
+                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name'])):
+                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name']))
+                save_name = str(self.data['source_name'])+'/'+self.settings['name']+'_'+str(self.data['source_name'])+'_'+self.model['timing']['timestamp']+'_SED.png'
+            else: # if it is not defined, save it to the main directory
+                save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_SED.png'
 
 
             # Save Figure
@@ -772,9 +786,16 @@ class SED():
             ax.set_xlabel("Step Number")
 
 
+
             # Build Name of Save File
 
-            save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_walkers.png'
+            if not isinstance(self.data['source_name'], type(None)): # if source name is defined save to own directory
+                import os   # Make source-specific directory
+                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name'])):
+                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name']))
+                save_name = str(self.data['source_name'])+'/'+self.settings['name']+'_'+str(self.data['source_name'])+'_'+self.model['timing']['timestamp']+'_walkers.png'
+            else: # if it is not defined, save it to the main directory
+                save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_walkers.png'
 
 
             # Save Figure
@@ -821,10 +842,15 @@ class SED():
             fig.set_size_inches(11.69,13.53)
 
 
-
             # Build Name of Save File
 
-            save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_corner.png'
+            if not isinstance(self.data['source_name'], type(None)): # if source name is defined save to own directory
+                import os   # Make source-specific directory
+                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name'])):
+                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name']))
+                save_name = str(self.data['source_name'])+'/'+self.settings['name']+'_'+str(self.data['source_name'])+'_'+self.model['timing']['timestamp']+'_corner.png'
+            else: # if it is not defined, save it to the main directory
+                save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_corner.png'
 
 
             # Save Figure

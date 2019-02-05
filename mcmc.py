@@ -16,9 +16,8 @@ roke.cepeda-arroita@manchester.ac.uk
 
 
 # TODO (minor): it would be handy to save all the fit parameters to a csv file (fit + errors) with pandas so that these can be copied into a report
-# TODO (major): fix the least-squares pre-initialisation so that MCMC convergence does not depend on initial guesses as much
 
-def mcmc(nu, flux, flux_err, beam, excluded):
+def mcmc(nu, flux, flux_err, beam, excluded, source_name=None):
 
 
     from config_mcmc import settings
@@ -28,14 +27,15 @@ def mcmc(nu, flux, flux_err, beam, excluded):
 
     # Data Dictionary Initialisation
 
-    data = {'nu': [],               # frequencies in GHz
-    		'flux': [],             # fluxes in Jy
-    		'flux_err': [],         # flux uncertainties in Jy
-    		'beam': [],             # solid angle of the source's primary aperture in sr!
-            'excluded': [],         # list of frequencies in GHz plotted but not fitted
-            'nu_fitted': [],        # non excluded frequencies in GHz
-            'flux_fitted': [],      # non-excluded fluxes in Jy
-            'flux_err_fitted': []   # non-excluded flux errors in Jy
+    data = {'nu': [],                   # frequencies in GHz
+    		'flux': [],                 # fluxes in Jy
+    		'flux_err': [],             # flux uncertainties in Jy
+    		'beam': [],                 # solid angle of the source's primary aperture in sr!
+            'excluded': [],             # list of frequencies in GHz plotted but not fitted
+            'nu_fitted': [],            # non excluded frequencies in GHz
+            'flux_fitted': [],          # non-excluded fluxes in Jy
+            'flux_err_fitted': [],      # non-excluded flux errors in Jy
+            'source_name': []  # name of the source, if defined
             }
 
 
@@ -46,7 +46,7 @@ def mcmc(nu, flux, flux_err, beam, excluded):
     data['flux_err'] = np.array(flux_err)
     data['beam'] = np.array(beam)
     data['excluded'] = np.array(excluded)
-
+    data['source_name'] = np.array(source_name)
 
 
     # Run MCMC

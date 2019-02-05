@@ -7,6 +7,8 @@ MCMC configuration file
 
 settings = {'name': 'MCMC',  # name with which your results and figures will start
 
+            'source_name': None, # name of your source - if set, it will save results in source-specific directories
+
 
             # MCMC Settings
 
