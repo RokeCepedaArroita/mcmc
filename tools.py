@@ -445,21 +445,24 @@ class SED():
                 all_within_priors = self.check_priors()
                 if not all_within_priors: # if priors not satisfied by lmfit results
                     self.model['sed_params'] = self.model['sed_guess'] # revert back to initial guesses
-                    print('*************** LEAST-SQUARES INFO **************')
-                    print('Could not initialise using least squares since')
-                    print('your least-squares results are outside your priors.')
-                    print('The original guesses will be passed to MCMC instead.\n')
+                    if self.settings['verbose']:
+                        print('*************** LEAST-SQUARES INFO **************')
+                        print('Could not initialise using least squares since')
+                        print('your least-squares results are outside your priors.')
+                        print('The original guesses will be passed to MCMC instead.\n')
 
                 elif all_within_priors:
-                    print('*************** LEAST-SQUARES INFO **************')
-                    print('Succesfully initialised guesses in {0:.1f} seconds!\n'.format(self.model['timing']['ls_sq_time']))
+                    if self.settings['verbose']:
+                        print('*************** LEAST-SQUARES INFO **************')
+                        print('Succesfully initialised guesses in {0:.1f} seconds!\n'.format(self.model['timing']['ls_sq_time']))
 
 
             except:  # If lmfit fails
-                print('*************** LEAST-SQUARES INFO **************')
-                print('Could not initialise using least squares since a')
-                print('general lmfit error occurred (e.g. poor data/models).')
-                print('The original guesses will be passed to MCMC instead.\n')
+                if self.settings['verbose']:
+                    print('*************** LEAST-SQUARES INFO **************')
+                    print('Could not initialise using least squares since a')
+                    print('general lmfit error occurred (e.g. poor data/models).')
+                    print('The original guesses will be passed to MCMC instead.\n')
 
 
             return
@@ -486,9 +489,10 @@ class SED():
 
         # Perform Multithread MCMC
 
-        sampler = emcee.EnsembleSampler(self.settings['MCMC']['nwalkers'], ndim, lnprob, args=(self.data['nu_fitted'], self.data['flux_fitted'], self.data['flux_err_fitted']),
-            pool=Pool(self.settings['nthreads']))
+        pool_object = Pool(self.settings['nthreads'])
 
+        sampler = emcee.EnsembleSampler(self.settings['MCMC']['nwalkers'], ndim, lnprob, args=(self.data['nu_fitted'], self.data['flux_fitted'],
+            self.data['flux_err_fitted']), pool=pool_object)
 
         time0 = time.time() # start time
 
@@ -496,6 +500,11 @@ class SED():
         with warnings.catch_warnings(): # turn off annoying emcee mcmctime warnings
             warnings.simplefilter("ignore")
             pos, prob, state  = sampler.run_mcmc(pos, self.settings['MCMC']['nsteps'])
+
+
+        # Very important to close the pool if you don't want threads to hang on forever!
+
+        pool_object.close()
 
         time1 = time.time() # stop time
 

@@ -14,7 +14,7 @@ Roke Cepeda-Arroita
 roke.cepeda-arroita@manchester.ac.uk
 '''
 
-
+# TODO (major): currently if no source name is set it will be saved in a folder called 'None' - STOP THIS MADNESS!
 # TODO (minor): it would be handy to save all the fit parameters to a csv file (fit + errors) with pandas so that these can be copied into a report
 
 def mcmc(nu, flux, flux_err, beam, excluded, source_name=None):
