@@ -22,8 +22,7 @@ settings = {'name': 'MCMC',  # name with which your results and figures will sta
             'nthreads': 8, # 8 is the optimal number in vulture (any more or less and it will be slower)
 
 
-            # Pre-Fit Using Least Squares (requires scipy)
-            # THIS IS NOT FULLY WORKING YET (AS OF JAN 25 2019), SO KEEP IT SET TO FALSE
+            # Pre-Fit Using Least Squares (requires lmfit)
 
             'least_sq_prefit': False,
 
@@ -49,7 +48,7 @@ settings = {'name': 'MCMC',  # name with which your results and figures will sta
                        'nu_AME': [5, 60],
                        'W_AME': [0.2, 1],
                        'nu_AME1': [5, 60],
-                       'W_AME': [0.2, 1],
+                       'W_AME1': [0.2, 1],
                        'T_d1': [10, 100],
                        'tau1': [-5, -2],
                        'beta1': [1.2, 2.2]},
