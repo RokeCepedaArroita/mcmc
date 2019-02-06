@@ -17,7 +17,7 @@ roke.cepeda-arroita@manchester.ac.uk
 # TODO (major): currently if no source name is set it will be saved in a folder called 'None' - STOP THIS MADNESS!
 # TODO (minor): it would be handy to save all the fit parameters to a csv file (fit + errors) with pandas so that these can be copied into a report
 
-def mcmc(nu, flux, flux_err, beam, excluded, source_name=None):
+def mcmc(nu, flux, flux_err, beam, excluded, custom_settings=None):
 
 
     from config_mcmc import settings
@@ -35,7 +35,7 @@ def mcmc(nu, flux, flux_err, beam, excluded, source_name=None):
             'nu_fitted': [],            # non excluded frequencies in GHz
             'flux_fitted': [],          # non-excluded fluxes in Jy
             'flux_err_fitted': [],      # non-excluded flux errors in Jy
-            'source_name': []  # name of the source, if defined
+            'source_name': []           # name of the source, if defined
             }
 
 
@@ -46,7 +46,6 @@ def mcmc(nu, flux, flux_err, beam, excluded, source_name=None):
     data['flux_err'] = np.array(flux_err)
     data['beam'] = np.array(beam)
     data['excluded'] = np.array(excluded)
-    data['source_name'] = np.array(source_name)
 
 
     # Run MCMC
@@ -58,7 +57,10 @@ def mcmc(nu, flux, flux_err, beam, excluded, source_name=None):
 
     # Initialise Object
 
-    my_sed = SED(data, settings)
+    if not isinstance(custom_settings, type(None)): # if custom settings name directly set, use custom settings
+        my_sed = SED(data, custom_settings)
+    else:  # if custom settings name NOT directly set, use settings in configuration file
+        my_sed = SED(data, settings)
 
 
     # Initialise SED Parameters in self.model

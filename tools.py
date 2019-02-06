@@ -18,9 +18,6 @@ class SED():
         self.data = data # this is your SED to fit: nu, flux, flux_error, beam, excluded freq
         self.settings = settings # configuration file: mcmc, components, plotting and verbose
 
-        if isinstance(self.data['source_name'], type(None)): # if source name not directly set, copy name in settings
-            self.data['source_name'] = self.settings['source_name']
-
 
         # Total SED model parameters: components and free parameters
 
@@ -605,11 +602,11 @@ class SED():
 
         # Build name of Save File
 
-        if not isinstance(self.data['source_name'], type(None)): # if source name is defined save to own directory
+        if not isinstance(self.settings['source_name'], type(None)): # if source name is defined save to own directory
             import os   # Make source-specific directory
-            if not os.path.exists('{}/{}'.format(self.settings['plotting']['resultdir'],self.data['source_name'])):
-                os.makedirs('{}/{}'.format(self.settings['plotting']['resultdir'],self.data['source_name']))
-            save_name = str(self.data['source_name'])+'/'+self.settings['name']+'_'+str(self.data['source_name'])+'_'+self.model['timing']['timestamp']+'.txt'
+            if not os.path.exists('{}/{}'.format(self.settings['plotting']['resultdir'],self.settings['source_name'])):
+                os.makedirs('{}/{}'.format(self.settings['plotting']['resultdir'],self.settings['source_name']))
+            save_name = str(self.settings['source_name'])+'/'+self.settings['name']+'_'+str(self.settings['source_name'])+'_'+self.model['timing']['timestamp']+'.txt'
         else: # if it is not defined, save it to the main directory
             save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'.txt'
 
@@ -732,11 +729,11 @@ class SED():
 
             # Build Name of Save File
 
-            if not isinstance(self.data['source_name'], type(None)): # if source name is defined save to own directory
+            if not isinstance(self.settings['source_name'], type(None)): # if source name is defined save to own directory
                 import os   # Make source-specific directory
-                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name'])):
-                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name']))
-                save_name = str(self.data['source_name'])+'/'+self.settings['name']+'_'+str(self.data['source_name'])+'_'+self.model['timing']['timestamp']+'_SED.png'
+                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.settings['source_name'])):
+                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.settings['source_name']))
+                save_name = str(self.settings['source_name'])+'/'+self.settings['name']+'_'+str(self.settings['source_name'])+'_'+self.model['timing']['timestamp']+'_SED.png'
             else: # if it is not defined, save it to the main directory
                 save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_SED.png'
 
@@ -798,11 +795,11 @@ class SED():
 
             # Build Name of Save File
 
-            if not isinstance(self.data['source_name'], type(None)): # if source name is defined save to own directory
+            if not isinstance(self.settings['source_name'], type(None)): # if source name is defined save to own directory
                 import os   # Make source-specific directory
-                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name'])):
-                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name']))
-                save_name = str(self.data['source_name'])+'/'+self.settings['name']+'_'+str(self.data['source_name'])+'_'+self.model['timing']['timestamp']+'_walkers.png'
+                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.settings['source_name'])):
+                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.settings['source_name']))
+                save_name = str(self.settings['source_name'])+'/'+self.settings['name']+'_'+str(self.settings['source_name'])+'_'+self.model['timing']['timestamp']+'_walkers.png'
             else: # if it is not defined, save it to the main directory
                 save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_walkers.png'
 
@@ -853,11 +850,11 @@ class SED():
 
             # Build Name of Save File
 
-            if not isinstance(self.data['source_name'], type(None)): # if source name is defined save to own directory
+            if not isinstance(self.settings['source_name'], type(None)): # if source name is defined save to own directory
                 import os   # Make source-specific directory
-                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name'])):
-                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.data['source_name']))
-                save_name = str(self.data['source_name'])+'/'+self.settings['name']+'_'+str(self.data['source_name'])+'_'+self.model['timing']['timestamp']+'_corner.png'
+                if not os.path.exists('{}/{}'.format(self.settings['plotting']['plotdir'],self.settings['source_name'])):
+                    os.makedirs('{}/{}'.format(self.settings['plotting']['plotdir'],self.settings['source_name']))
+                save_name = str(self.settings['source_name'])+'/'+self.settings['name']+'_'+str(self.settings['source_name'])+'_'+self.model['timing']['timestamp']+'_corner.png'
             else: # if it is not defined, save it to the main directory
                 save_name = self.settings['name']+'_'+self.model['timing']['timestamp']+'_corner.png'
 
