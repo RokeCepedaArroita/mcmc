@@ -59,7 +59,7 @@ Install these dependencies using `pip` or `conda`.
        flux,                   # List of fluxes (Jy)
        flux_err,               # List of flux uncertainties (Jy)
        beam=0.00034421768435898063,  # Beam solid angle (sr)
-       excluded=[19, 100, 217, 4997], # Frequencies to exclude (GHz)
+       excluded=[100, 217, 4997], # Frequencies to exclude (GHz)
        custom_settings=None,   # Optional: custom configuration dictionary
        source_information=None # Optional: additional source-specific metadata
    )
@@ -73,18 +73,6 @@ Install these dependencies using `pip` or `conda`.
    - **`custom_settings`**: Pass a custom configuration dictionary (overrides the default `mcmc_config.py` settings).
    - **`source_information`**: Pass source-specific metadata (optional).
 
-   **Example Usage**:
-   ```python
-   mcmc_data, mcmc_model, mcmc_settings = mcmc.mcmc(
-       nu=[1.4, 2.7, 4.85],
-       flux=[100, 80, 60],
-       flux_err=[10, 8, 6],
-       beam=0.0001,
-       excluded=[2],
-       custom_settings=my_settings,
-       source_information={'source_name': 'ExampleSource'}
-   )
-   ```
 
    The program will automatically:
    1. Validate your input.
@@ -201,6 +189,88 @@ Install these dependencies using `pip` or `conda`.
  - **Free-free emission**
 
  Custom emission models can be added as required.
+
+ ## **Emission Models**
+
+`emission.py` includes the following built-in models for SED fitting. Each emission mechanism is based on established physical principles, as described below:
+
+
+# 1. **Synchrotron Emission**
+
+Synchrotron radiation arises from relativistic electrons spiraling in magnetic fields. The flux density is proportional to a power-law of the frequency:
+
+$$S(\nu) = A_{\text{sync}} \cdot \nu^{\alpha}$$
+
+where:
+- \(A_{\text{sync}}\): Synchrotron amplitude (Jy)
+- \(\nu\): Frequency (GHz)
+- \(\alpha\): Spectral index
+
+---
+
+# 2. **Anomalous Microwave Emission (AME)**
+
+a. Log-Normal AME
+AME is modeled as a log-normal distribution:
+
+$$S(\nu) = A_{\text{AME}} \cdot \exp\left(-\frac{1}{2} \left(\frac{\ln(\nu) - \ln(\nu_{\text{AME}})}{W_{\text{AME}}}\right)^2 \right)$$
+
+where:
+- \(A_{\text{AME}}\): AME amplitude (Jy)
+- \(\nu_{\text{AME}}\): Peak frequency (GHz)
+- \(W_{\text{AME}}\): Logarithmic width
+
+b. AME Template
+The AME template uses pre-computed spectral shapes scaled to match the amplitude and peak frequency of the observations.
+
+
+# 3. **Free-Free Emission**
+
+Free-free emission originates from electron-ion interactions and depends on the emission measure (\(EM\)) and frequency:
+
+$$\tau_{\text{ff}} = 5.468 \cdot 10^{-2} \cdot T_e^{-1.5} \cdot \nu^{-2} \cdot EM \cdot g_{\text{ff}}$$
+
+$$T_{\text{ff}} = T_e \cdot \left(1 - e^{-\tau_{\text{ff}}}\right)$$
+
+$$S(\nu) = \frac{2 k \cdot \nu^2 \cdot T_{\text{ff}} \cdot \Omega}{c^2} \cdot 10^{26}$$
+
+where:
+- \(T_e = 7500\): Electron temperature (K)
+- \(EM\): Emission measure (pc cm\(^{-6}\))
+- \(g_{\text{ff}}\): Gaunt factor
+- \(\nu\): Frequency (GHz)
+- \(\Omega\): Beam solid angle (sr)
+
+
+# 4. **CMB Emission**
+
+CMB anisotropies are modeled using the Planck blackbody correction:
+
+$$S(\nu) = \frac{2 k \cdot \nu^2 \cdot \Delta T \cdot \Omega}{c^2} \cdot \text{PlanckCorr}(\nu) \cdot 10^{26}$$
+
+The Planck correction factor is:
+
+$$\text{PlanckCorr}(\nu) = \frac{x^2 e^x}{(e^x - 1)^2}, \, x = \frac{h \nu}{k T_{\text{CMB}}}$$
+
+where:
+- \(\Delta T\): Temperature fluctuation (\(\mu\)K)
+- \(T_{\text{CMB}} = 2.725\): CMB temperature (K)
+- \(\nu\): Frequency (GHz)
+
+
+# 5. **Thermal Dust Emission**
+
+Thermal dust emission is modeled using a modified blackbody spectrum:
+
+$$S(\nu) = \frac{2 h \nu^3}{c^2} \cdot \frac{1}{e^{\frac{h \nu}{k T_d}} - 1} \cdot \tau_{353} \cdot \left(\frac{\nu}{353}\right)^{\beta} \cdot \Omega \cdot 10^{26}$$
+
+where:
+- \(T_d\): Dust temperature (K)
+- \(\tau_{353}\): Optical depth at 353 GHz
+- \(\beta\): Dust emissivity index
+- \(\nu\): Frequency (GHz)
+- \(\Omega\): Beam solid angle (sr)
+
 
  ---
 
