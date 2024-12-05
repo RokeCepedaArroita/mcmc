@@ -9,9 +9,9 @@ mcmc_data, mcmc_model, mcmc_settings = mcmc.mcmc(nu, flux, flux_err, beam=0.0003
 
 NOTE: the 'beam' is the solid angle in steradians of the source's primary aperture!
 
-Version 1.02 [Feb 2019]
+Version 2.0 [Dec 2024]
 Roke Cepeda-Arroita
-roke.cepeda-arroita@manchester.ac.uk
+rcepeda@iac.es
 '''
 
 # TODO (major): currently if no source name is set it will be saved in a folder called 'None' - STOP THIS MADNESS!
