@@ -17,7 +17,7 @@ roke.cepeda-arroita@manchester.ac.uk
 # TODO (major): currently if no source name is set it will be saved in a folder called 'None' - STOP THIS MADNESS!
 # TODO (minor): it would be handy to save all the fit parameters to a csv file (fit + errors) with pandas so that these can be copied into a report
 
-def mcmc(nu, flux, flux_err, beam, excluded, custom_settings=None):
+def mcmc(nu, flux, flux_err, beam, excluded, custom_settings=None, source_information=None):
 
 
     from config_mcmc import settings
@@ -68,6 +68,11 @@ def mcmc(nu, flux, flux_err, beam, excluded, custom_settings=None):
     my_sed.fetch_sed_parameters()
 
 
+    # Check that parameters are reasonable
+
+    my_sed.check_input()
+
+
     # Print Pre-Fit Information
 
     my_sed.prefit_info()
@@ -102,7 +107,7 @@ def mcmc(nu, flux, flux_err, beam, excluded, custom_settings=None):
 
     # Save Results
 
-    my_sed.save_results()
+    my_sed.save_results(source_information)
 
 
     # Return parameters

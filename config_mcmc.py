@@ -21,12 +21,12 @@ settings = {'name': 'MCMC',  # name with which your results and figures will sta
 
             # Pooling Threads
 
-            'nthreads': 1, # 8 is the optimal number in vulture (any more or less and it will be slower)
+            'nthreads': 8, # 8 is the optimal number in vulture (any more or less and it will be slower)
 
 
             # Pre-Fit Using Least Squares (requires lmfit)
 
-            'least_sq_prefit': False,
+            'least_sq_prefit': True,
 
 
             # SED Model Settings - choose the number of models of each type!
@@ -82,9 +82,9 @@ settings = {'name': 'MCMC',  # name with which your results and figures will sta
 
             'plotting': {'resultdir': '/scratch/nas_falcon/scratch/rca/projects/',      # results save directory
                          'plotdir': '/scratch/nas_falcon/scratch/rca/projects/',        # figure save directory
-                         'plotSED': False,             # save SED plot
-                         'plotCorner': False,          # save corner plot
-                         'plotWalkers': False,         # save walkers plot
+                         'plotSED': True,             # save SED plot
+                         'plotCorner': True,          # save corner plot
+                         'plotWalkers': True,         # save walkers plot
                          'pdfSED': False,              # save SED plot as borderless pdf rather than normal png
                          'pdfCorner': False,           # save corner plot as borderless pdf rather than normal png
                          'pdfWalkers': False,          # save walkers plot as borderless pdf rather than normal png

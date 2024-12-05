@@ -107,12 +107,13 @@ class SED():
             Function to fetch parameters and number of parameters
             '''
 
-            from inspect import getfullargspec
+            from inspect import getargspec
 
-            params = getfullargspec(func).args  # Get the positional argument names
-            nparams = len(params)  # Count the number of parameters
+            params = getargspec(func).args
+            nparams = len(params)
 
             return params, nparams
+
 
         # Get model information from emission.py
 
@@ -445,7 +446,7 @@ class SED():
                 fitter = Minimizer(Error,lm_param, reduce_fcn=Residual,fcn_args=(self.data['nu_fitted'],
                     self.data['flux_fitted'], self.data['flux_err_fitted']))
 
-                lmfit_results = fitter.minimize(method='leastsq')
+                lmfit_results = fitter.minimize(method='leastsq')#
 
 
                 # Extract resulting parameters
@@ -530,7 +531,7 @@ class SED():
         import warnings
         with warnings.catch_warnings(): # turn off annoying emcee mcmctime warnings
             warnings.simplefilter("ignore")
-            pos, prob, state  = sampler.run_mcmc(pos, self.settings['MCMC']['nsteps'], progress=True)
+            pos, prob, state  = sampler.run_mcmc(pos, self.settings['MCMC']['nsteps'])
 
 
         # Very important to close the pool if you don't want threads to hang on forever!
@@ -544,7 +545,9 @@ class SED():
 
 
         # Flatten Chain and Discard 'nburnin' measurements (don't use sampler.flatchain)
-        samples = sampler.chain[:, self.settings['MCMC']['nburnin']:, :].reshape((-1, ndim)) # mix all walkers together and steps after burn in
+
+        samples = sampler.chain[:, self.settings['MCMC']['nburnin']:, :].reshape((-1, ndim))
+
 
         # TODO: IMPROVE CONVERGENCE FILTERS
         # At the moment filtering walkers with standard deviations of less than 0.001%. Using exactly 0% will catch almost all cases, so maybe that is a better idea in the future.
@@ -566,11 +569,12 @@ class SED():
 
         def sigma_clipping(burned_samples, sigma_level):
 
+
+
+
             return #walkers_kept
 
-
-        # Fixed bug where if the mean is negative it would get rid of every walker, by adding np.abs (Dec 2024)
-        self.model['walkers']['kept'] = np.where(np.abs(np.divide(walker_nanstd,mean_walker_value)) > self.settings['MCMC']['stuck_threshold'])
+        self.model['walkers']['kept'] = np.where(np.divide(walker_nanstd,mean_walker_value) > self.settings['MCMC']['stuck_threshold'])
         self.model['walkers']['percent_kept'] = np.divide(float(len(self.model['walkers']['kept'][0])),self.settings['MCMC']['nwalkers'])*1e2
 
 
@@ -582,7 +586,6 @@ class SED():
         # Remove Samples that Did Not Pass Convergence Test
 
         samples = sampler.chain[self.model['walkers']['kept'], self.settings['MCMC']['nburnin']:, :].reshape((-1, ndim))
-
 
 
         # Record Parameter Values and Errors
@@ -640,7 +643,7 @@ class SED():
 
 
 
-    def save_results(self, source_information=None):
+    def save_results(self):
         '''
         Saves results to ASCII text file
         '''
@@ -667,7 +670,7 @@ class SED():
         self.model['timing']['runtime'] = self.model['timing']['finish']-self.model['timing']['start']
 
 
-        # Save Data to ASCII
+        # Save Data
 
         fo = open(self.settings['plotting']['resultdir']+'/'+save_name, 'w')
 
@@ -691,28 +694,10 @@ class SED():
         fo.close()
 
 
-        # Save Data to Joblib json file
-        from joblib import dump
-        joblib_save_name = save_name.replace('.txt', '.joblib')
-
-        # Temporarily remove the 'sed_model' before saving
-        temp_sed_model = self.model.pop('sed_model', None)
-
-        # Save the object without 'sed_model'
-        if source_information is not None:
-            dump({'settings': self.settings, 'data': self.data, 'model': self.model, 'source': source_information},
-                 self.settings['plotting']['resultdir'] + '/' + joblib_save_name, compress=0)
-        else:
-            dump({'settings': self.settings, 'data': self.data, 'model': self.model},
-                 self.settings['plotting']['resultdir'] + '/' + joblib_save_name, compress=0)
-
-        # Restore the 'sed_model' after saving
-        self.model['sed_model'] = temp_sed_model
 
         if self.settings['verbose']:
             print('\n************** RESULTS SAVED! *************\n')
-            save_name_without_txt = save_name.replace('.txt', '')
-            print('Saved files as {} in {}'.format(save_name_without_txt, self.settings['plotting']['resultdir']))
+            print('Saved as {} in \n{}'.format(save_name,self.settings['plotting']['resultdir'],save_name))
             print('Program finished with a runtime of {:.0f}s!\n'.format(self.model['timing']['runtime']))
 
 
@@ -738,10 +723,10 @@ class SED():
 
             # Start gridspec
 
-            factor_smaller = 1.15
-            ratio_figures = [1, 0.2]
+            factor_smaller = 0.9
+            ratio_figures = 0.05
 
-            fig = plt.figure(1,figsize=(5.2*factor_smaller,4.52*factor_smaller)) # plot fit & components
+            fig = plt.figure(1,figsize=(4.5*factor_smaller,6*factor_smaller))
 
             # Define subplots
 
@@ -750,7 +735,9 @@ class SED():
             ax0 = plt.subplot(gs[0])
             ax1 = plt.subplot(gs[1], sharex=ax0)
             plt.setp(ax0.get_xticklabels(), visible=False)
-            ax0.tick_params(axis='x', which='both', direction='in')
+            ax0.tick_params(axis='x',direction='in')
+
+            plt.figure(1) # plot fit & components
 
             nu_space = np.logspace(-2,5,400) # create well-sampled x-space
 
@@ -758,7 +745,7 @@ class SED():
             # Plot Spread of SEDs in the MCMC Chain  # TODO: MAKE NUMBER OF CHAIN SEDS = 100 TUNABLE ?
 
             for mcmc_params in self.mcmc_chain['samples'][np.random.randint(len(self.mcmc_chain['samples']), size=100)]:
-                ax0.plot(nu_space, self.model['sed_model'](nu_space,self.data['beam'],mcmc_params), color='#0072bd', alpha=0.05)
+                plt.plot(nu_space, self.model['sed_model'](nu_space,self.data['beam'],mcmc_params), color='#0072bd', alpha=0.05)
 
 
             # Plot Each Component
@@ -789,7 +776,7 @@ class SED():
                 # Plot it
 
                 linestyle_to_use = np.mod(i,len(style_rep))
-                ax0.plot(nu_space,component_flux,color="#c2c2d6", linestyle=style_rep[linestyle_to_use])
+                plt.plot(nu_space,component_flux,color="#c2c2d6", linestyle=style_rep[linestyle_to_use])
 
                 # Get index for the next set of parameters
 
@@ -800,13 +787,13 @@ class SED():
             # Plot Final Model and Residuals
 
             ymodel = self.model['sed_model'](nu_space,self.data['beam'],self.model['sed_params'])
-            ax0.plot(nu_space,ymodel, color='k', lw=1, alpha=0.8) # Plot Optimal solution
+            plt.plot(nu_space,ymodel, color='k', lw=1, alpha=0.8) # Plot Optimal solution
 
             for i in range(0,len(self.data['nu'])): # Data Points
                 if self.data['nu'][i] in self.data['nu_fitted']: # Fitted -> Filled points
-                    ax0.errorbar(self.data['nu'][i], self.data['flux'][i], yerr=self.data['flux_err'][i],color='#ff7f0e', fmt='o')
+                    plt.errorbar(self.data['nu'][i], self.data['flux'][i], yerr=self.data['flux_err'][i],color='#ff7f0e', fmt='o')
                 else: # Not Fitted -> Hollow Points
-                    ax0.errorbar(self.data['nu'][i], self.data['flux'][i], yerr=self.data['flux_err'][i], fmt='o', color='#ff7f0e',markerfacecolor='None')
+                    plt.errorbar(self.data['nu'][i], self.data['flux'][i], yerr=self.data['flux_err'][i], fmt='o', color='#ff7f0e',markerfacecolor='None')
 
 
             # Upper x-limit so that models are not shown over 7 THz since they become unphysical at such frequencies
@@ -815,48 +802,61 @@ class SED():
                 sed_upper_x_limit = 7e3
             else:
                 sed_upper_x_limit = np.max(self.data['flux'])*2.
-                sed_upper_x_limit = 7e3 # Forcing this for now since a bug occurs sometimes where the highest frequencies are chopped
 
-            ax0.set_xscale('log')
-            ax0.set_yscale('log')
-            ax0.set_ylabel('Flux Density (Jy)')
-            ax0.set_xlim([np.min(self.data['nu'])/2.,sed_upper_x_limit])
-            ax0.set_ylim([0.02, np.max(self.data['flux'])*2.])
+            plt.xscale('log')
+            plt.yscale('log')
+            plt.xlabel('Frequency (GHz)')
+            plt.ylabel('Flux Density (Jy)')
+            plt.xlim([np.min(self.data['nu'])/2.,np.max(self.data['nu'])*2.])
+            plt.ylim([0.05,sed_upper_x_limit])
+
+            # TODO: Plot residuals here as a thin x-axis subplot
+
+            # Top plot
+
+            ax0.errorbar(dist_b223, v_b223, yerr=v_b223_err, color='k', fmt='*', markerfacecolor='k', capsize=1, markersize=5,markeredgewidth=0.7, elinewidth=0.7, label='B223 Radial Profile')
+            ax0.errorbar(dist_b30, v_b30, yerr=v_b30_err, color='#ff5c00', fmt='*', markerfacecolor='#ff5c00', capsize=1, markersize=5,markeredgewidth=0.7, elinewidth=0.7, label='B30 Radial Profile')
+            ax0.set_xlim(xlim_custom)
+            ax0.set_ylim(ylim_custom2)
+            ax0.legend(fontsize=9)
+
+            axis2 = ax0.twiny()  # instantiate a second axes that shares the same x-axis
+            label = axis2.set_xlabel(r'$D\,_{\lambda\,\rm{Orionis}}$ (pc)')  # we already handled the x-label with ax1
+            distances_to_plot = [1.7735, 2.7285, 3.6835]
+            distances_to_plot_text = ['13', '20', '27']
+            #axis2.tick_params(axis='x', which='minor', color='white')
+            axis2.set_xbound(ax0.get_xbound())
+            axis2.set_xticks(distances_to_plot)
+            axis2.set_xticklabels(distances_to_plot_text)
+            axis2.xaxis.set_label_coords(0.87, 1.06)
+
+            ax0.set_ylabel('{} {}'.format(title_2,unit_2))
+            ax0.set_yticks([21,24,27,30,33])
+            ax0.grid(alpha=0.2)
 
 
-            # Plot residuals here as a thin x-axis subplot
+            plt.subplots_adjust(hspace=.0)
 
-            residuals = []
-            residuals_fitted = []
+            # Bottom plot
 
-            for i in range(0,len(self.data['nu'])): # Data Points
-                if self.data['nu'][i] in self.data['nu_fitted']: # Fitted -> Filled points
-                    ymodel_point = self.model['sed_model'](self.data['nu'][i],self.data['beam'],self.model['sed_params'])
-                    #ax1.errorbar(self.data['nu'][i], self.data['flux'][i] - ymodel_point, yerr=self.data['flux_err'][i],color='#ff7f0e', fmt='o')
-                    #residuals.append(self.data['flux'][i] - ymodel_point)
-                    ax1.errorbar(self.data['nu'][i], (self.data['flux'][i] - ymodel_point)/self.data['flux_err'][i], color='#ff7f0e', fmt='o')
-                    residuals.append((self.data['flux'][i] - ymodel_point)/self.data['flux_err'][i])
-                    residuals_fitted.append((self.data['flux'][i] - ymodel_point)/self.data['flux_err'][i])
-                else: # Not Fitted -> Hollow Points
-                    ymodel_point = self.model['sed_model'](self.data['nu'][i],self.data['beam'],self.model['sed_params'])
-                    #ax1.errorbar(self.data['nu'][i], self.data['flux'][i]-ymodel_point, yerr=self.data['flux_err'][i], fmt='o', color='#ff7f0e',markerfacecolor='None')
-                    #residuals.append(self.data['flux'][i] - ymodel_point)
-                    ax1.errorbar(self.data['nu'][i], (self.data['flux'][i] - ymodel_point)/self.data['flux_err'][i], fmt='o', color='#ff7f0e',markerfacecolor='None')
-                    residuals.append((self.data['flux'][i] - ymodel_point)/self.data['flux_err'][i])
+            ax1.fill_between(bin_middle, np.array(w_mean)-np.array(w_mean_err), np.array(w_mean)+np.array(w_mean_err), alpha=0.15, facecolor='#ff5c00', edgecolor='w', label='Weighted Mean')
+            #ax1.plot(bin_middle, np.array(w_mean),color='#ff5c00',linestyle='--',alpha=0.2, label='Weighted Mean')
+            ax1.errorbar(rho_1, rho_2, yerr=rho_err_2, color='#ababab', fmt='s', markerfacecolor='none', capsize=1, markersize=3,markeredgewidth=0.5, elinewidth=0.5, label='Simulation')
+            ax1.errorbar(lam_1, lam_2, yerr=lam_err_2, color='#ff5c00', fmt='^', markerfacecolor='none', capsize=1, markersize=5,markeredgewidth=0.7, elinewidth=0.7, label='Data')
 
-            ax1.set_xscale('log')
-            #ax1.set_yscale('log')
-            ax1.plot([np.min(self.data['nu'])/2.,sed_upper_x_limit], [0,0], color='k', lw=1, alpha=0.8)
-            ax1.set_xlabel('Frequency (GHz)')
-            ax1.set_ylabel(r'$\Delta\sigma$')
-            ax1.set_xlim([np.min(self.data['nu'])/2.,sed_upper_x_limit])
-            ax1.set_ylim([-np.max(np.abs(residuals_fitted))*1.5,np.max(np.abs(residuals_fitted))*1.5])
+            ax1.set_ylim(ylim_custom)
 
+            ax1.set_xlabel('{} {}'.format(title_1,unit_1))
+            ax1.set_ylabel('{} {}'.format(title_2,unit_2))
+            ax1.set_yticks([20,23,26,29,32,35])
+
+            ax1.legend(fontsize=9)
+            ax1.grid(alpha=0.2)
 
             # Remove vertical gap between subplots
 
             plt.tight_layout()
-            plt.subplots_adjust(hspace=.03)
+            plt.subplots_adjust(hspace=.0)
 
 
             # Build Name of Save File
@@ -875,7 +875,7 @@ class SED():
             if self.settings['plotting']['pdfSED']:
                 plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.pdf', dpi=self.settings['plotting']['dpi'], bbox_inches='tight', pad_inches=0)
             else:
-                plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.png', dpi=self.settings['plotting']['dpi'], bbox_inches='tight', pad_inches=0)
+                plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.png', dpi=self.settings['plotting']['dpi'])
 
 
             plt.clf()
@@ -946,7 +946,7 @@ class SED():
             if self.settings['plotting']['pdfWalkers']:
                 plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.pdf', dpi=self.settings['plotting']['dpi'], bbox_inches='tight', pad_inches=0)
             else:
-                plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.png', dpi=self.settings['plotting']['dpi'], bbox_inches='tight', pad_inches=0)
+                plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.png', dpi=self.settings['plotting']['dpi'])
 
             plt.clf()
             plt.close(2)
@@ -970,7 +970,6 @@ class SED():
         plt.rc('font', family='serif')
         plt.rc('font', family='serif')
         plt.rc('mathtext',fontset='cm',rm='serif')
-        plt.rcParams.update({'font.size': 8.7})
 
         time0 = time.time() # start time
 
@@ -987,8 +986,9 @@ class SED():
                 #truths=[T_d_true, tau_true, beta_true, EM_true,A_true, nu_mod_true, nu_width_true],\
                 quantiles=[0.170675, 0.5, 0.829325], show_titles=True, quiet=True, labels_args={"fontsize": 40}) # Get 1 Sigma Percentiles
 
+
             fig.set_size_inches(11.69,13.53)
-            plt.subplots_adjust(hspace=0.03, wspace=0.03)
+
 
             # Build Name of Save File
 
@@ -1006,7 +1006,7 @@ class SED():
             if self.settings['plotting']['pdfCorner']:
                 plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.pdf', dpi=self.settings['plotting']['dpi'], bbox_inches='tight', pad_inches=0)
             else:
-                plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.png', dpi=self.settings['plotting']['dpi'], bbox_inches='tight', pad_inches=0)
+                plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.png', dpi=self.settings['plotting']['dpi'])
 
             plt.clf()
             plt.close(3)
@@ -1015,12 +1015,6 @@ class SED():
         time1 = time.time() # stop time
         self.model['timing']['corner_time'] = time1-time0
 
-        # Reset matplotlib params just in case
-
-        plt.rcParams.update(plt.rcParamsDefault)
-        plt.rc('font', family='serif')
-        plt.rc('font', family='serif')
-        plt.rc('mathtext',fontset='cm',rm='serif')
 
         return
 
@@ -1044,7 +1038,7 @@ class SED():
 
             print('************** POST-FIT INFORMATION *************\n')
             print('ACCEPTANCE = {0:.1f}%, MCMC_TIME = {1:.1f}s [{2:.0f} us/step]'.format(self.model['sed_acceptance']*1e2, self.model['timing']['mcmctime'], STEP_TIME))
-            print('WALKERS_KEPT = {}/{} [{:.1f}%], RED_CHI_SQ = {:0.1f}'.format(len(self.model['walkers']['kept'][0]), self.settings['MCMC']['nwalkers'],
+            print('WALKERS_KEPT = {}/{} [{}%], RED_CHI_SQ = {:0.1f}'.format(len(self.model['walkers']['kept'][0]), self.settings['MCMC']['nwalkers'],
                 self.model['walkers']['percent_kept'], self.model['sed_chi_squared']))
             print('FITTED PARAMETERS = \n{}'.format(COMPONENT_STRING))
 
