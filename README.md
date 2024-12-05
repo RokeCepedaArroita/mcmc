@@ -172,7 +172,7 @@ Install these dependencies using `pip` or `conda`.
 
  ---
 
- ## **Emission Models**
+ ## **Built-in Emission Models**
 
   `emission.py` includes several built-in models for different emission mechanisms, each based on specific physical principles. These models can be customized or extended as needed. Below are the details of the implemented emission mechanisms:
 
@@ -180,7 +180,7 @@ Install these dependencies using `pip` or `conda`.
 
   ### Synchrotron Emission
 
-  Synchrotron radiation arises from relativistic electrons spiraling in magnetic fields. The flux density follows a power-law dependence on frequency:
+  Synchrotron radiation arises from relativistic electrons spiraling in magnetic fields. The flux density is modeled by a power-law dependence on frequency:
 
   $$S(\nu) = A_{\text{sync}} \cdot \nu^{\alpha}$$
 
@@ -206,7 +206,7 @@ Install these dependencies using `pip` or `conda`.
 
   #### AME Template
 
-  The AME template uses pre-computed spectral shapes scaled to match the amplitude and peak frequency of the observations. The details of this method depend on external templates and interpolation.
+  The AME template uses pre-computed spectral shapes from `SpDust` or `SpyDust` scaled to match the amplitude and peak frequency of the observations. The details of this method depend on external templates and interpolation.
 
   ---
 
@@ -232,11 +232,11 @@ Install these dependencies using `pip` or `conda`.
 
   ### CMB Emission
 
-  CMB anisotropies are modeled using a blackbody correction factor. The flux density is:
+  CMB anisotropies are modeled using a blackbody. The flux density is:
 
   $$S(\nu) = \frac{2 k \cdot \nu^2 \cdot \Delta T \cdot \Omega}{c^2} \cdot \text{PlanckCorr}(\nu) \cdot 10^{26}$$
 
-  where the Planck correction factor is:
+  where:
 
   $$\text{PlanckCorr}(\nu) = \frac{x^2 e^x}{(e^x - 1)^2}, \quad x = \frac{h \nu}{k T_{\text{CMB}}}$$
 
