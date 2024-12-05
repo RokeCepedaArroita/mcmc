@@ -107,7 +107,12 @@ Install these dependencies using `pip` or `conda`.
      },
      'nthreads': 5,
      'least_sq_prefit': True,
-     'components': {},  # Define your SED components here
+     'components': {'synchrotron': 0,   # synchrotron emission
+                    'freefree': 1,      # free-free emission
+                    'ame': 1,           # anomalous microwave emission
+                    'cmb': 0,           # cmb anisotropies
+                    'thermaldust': 1    # thermal dust emission
+                   },  # add your own here!
      'priors': {},      # Define parameter priors
      'guesses': {},     # Initial parameter guesses
      'plotting': {
@@ -195,7 +200,7 @@ Install these dependencies using `pip` or `conda`.
 `emission.py` includes the following built-in models for SED fitting. Each emission mechanism is based on established physical principles, as described below:
 
 
-# 1. **Synchrotron Emission**
+### 1. **Synchrotron Emission**
 
 Synchrotron radiation arises from relativistic electrons spiraling in magnetic fields. The flux density is proportional to a power-law of the frequency:
 
@@ -208,7 +213,7 @@ where:
 
 ---
 
-# 2. **Anomalous Microwave Emission (AME)**
+### 2. **Anomalous Microwave Emission (AME)**
 
 a. Log-Normal AME
 AME is modeled as a log-normal distribution:
@@ -224,7 +229,7 @@ b. AME Template
 The AME template uses pre-computed spectral shapes scaled to match the amplitude and peak frequency of the observations.
 
 
-# 3. **Free-Free Emission**
+### 3. **Free-Free Emission**
 
 Free-free emission originates from electron-ion interactions and depends on the emission measure (\(EM\)) and frequency:
 
@@ -242,7 +247,7 @@ where:
 - \(\Omega\): Beam solid angle (sr)
 
 
-# 4. **CMB Emission**
+### 4. **CMB Emission**
 
 CMB anisotropies are modeled using the Planck blackbody correction:
 
@@ -258,7 +263,7 @@ where:
 - \(\nu\): Frequency (GHz)
 
 
-# 5. **Thermal Dust Emission**
+### 5. **Thermal Dust Emission**
 
 Thermal dust emission is modeled using a modified blackbody spectrum:
 
