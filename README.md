@@ -186,98 +186,98 @@ Install these dependencies using `pip` or `conda`.
 
  ## **Emission Models**
 
- `emission.py` includes the following built-in models:
- - **Synchrotron emission**
- - **Anomalous Microwave Emission (AME)** (log-normal and SPDust templates)
- - **Thermal dust emission**
- - **CMB emission**
- - **Free-free emission**
+  `emission.py` includes several built-in models for different emission mechanisms, each based on specific physical principles. These models can be customized or extended as needed. Below are the details of the implemented emission mechanisms:
 
- Custom emission models can be added as required.
+  ---
 
- ## **Emission Models**
+  ### Synchrotron Emission
 
-`emission.py` includes the following built-in models for SED fitting. Each emission mechanism is based on established physical principles, as described below:
+  Synchrotron radiation arises from relativistic electrons spiraling in magnetic fields. The flux density follows a power-law dependence on frequency:
 
+  $$S(\nu) = A_{\text{sync}} \cdot \nu^{\alpha}$$
 
-### 1. **Synchrotron Emission**
+  where:
+  - $A_{\text{sync}}$: Synchrotron amplitude (Jy)
+  - $\nu$: Frequency (GHz)
+  - $\alpha$: Spectral index
 
-Synchrotron radiation arises from relativistic electrons spiraling in magnetic fields. The flux density is proportional to a power-law of the frequency:
+  ---
 
-$$S(\nu) = A_{\text{sync}} \cdot \nu^{\alpha}$$
+  ### Anomalous Microwave Emission (AME)
 
-where:
-- \(A_{\text{sync}}\): Synchrotron amplitude (Jy)
-- \(\nu\): Frequency (GHz)
-- \(\alpha\): Spectral index
+  #### Log-Normal AME
 
----
+  AME is modeled as a log-normal distribution:
 
-### 2. **Anomalous Microwave Emission (AME)**
+  $$S(\nu) = A_{\text{AME}} \cdot \exp\left(-\frac{1}{2} \left(\frac{\ln(\nu) - \ln(\nu_{\text{AME}})}{W_{\text{AME}}}\right)^2 \right)$$
 
-a. Log-Normal AME
-AME is modeled as a log-normal distribution:
+  where:
+  - $A_{\text{AME}}$: AME amplitude (Jy)
+  - $\nu_{\text{AME}}$: Peak frequency (GHz)
+  - $W_{\text{AME}}$: Logarithmic width
 
-$$S(\nu) = A_{\text{AME}} \cdot \exp\left(-\frac{1}{2} \left(\frac{\ln(\nu) - \ln(\nu_{\text{AME}})}{W_{\text{AME}}}\right)^2 \right)$$
+  #### AME Template
 
-where:
-- \(A_{\text{AME}}\): AME amplitude (Jy)
-- \(\nu_{\text{AME}}\): Peak frequency (GHz)
-- \(W_{\text{AME}}\): Logarithmic width
+  The AME template uses pre-computed spectral shapes scaled to match the amplitude and peak frequency of the observations. The details of this method depend on external templates and interpolation.
 
-b. AME Template
-The AME template uses pre-computed spectral shapes scaled to match the amplitude and peak frequency of the observations.
+  ---
 
+  ### Free-Free Emission
 
-### 3. **Free-Free Emission**
+  Free-free emission, arising from electron-ion interactions, depends on the emission measure ($EM$) and frequency. The optical depth is given by:
 
-Free-free emission originates from electron-ion interactions and depends on the emission measure (\(EM\)) and frequency:
+  $$\tau_{\text{ff}} = 5.468 \cdot 10^{-2} \cdot T_e^{-1.5} \cdot \nu^{-2} \cdot EM \cdot g_{\text{ff}}$$
 
-$$\tau_{\text{ff}} = 5.468 \cdot 10^{-2} \cdot T_e^{-1.5} \cdot \nu^{-2} \cdot EM \cdot g_{\text{ff}}$$
+  The flux density is then:
 
-$$T_{\text{ff}} = T_e \cdot \left(1 - e^{-\tau_{\text{ff}}}\right)$$
+  $$S(\nu) = \frac{2 k \cdot \nu^2 \cdot T_{\text{ff}} \cdot \Omega}{c^2} \cdot 10^{26}$$
 
-$$S(\nu) = \frac{2 k \cdot \nu^2 \cdot T_{\text{ff}} \cdot \Omega}{c^2} \cdot 10^{26}$$
+  where:
+  - $T_{\text{ff}} = T_e \cdot (1 - e^{-\tau_{\text{ff}}})$: Free-free brightness temperature (K)
+  - $T_e$: Electron temperature, fixed at $7500$ K
+  - $EM$: Emission measure (pc cm$^{-6}$)
+  - $g_{\text{ff}}$: Gaunt factor
+  - $\nu$: Frequency (GHz)
+  - $\Omega$: Beam solid angle (sr)
 
-where:
-- \(T_e = 7500\): Electron temperature (K)
-- \(EM\): Emission measure (pc cm\(^{-6}\))
-- \(g_{\text{ff}}\): Gaunt factor
-- \(\nu\): Frequency (GHz)
-- \(\Omega\): Beam solid angle (sr)
+  ---
 
+  ### CMB Emission
 
-### 4. **CMB Emission**
+  CMB anisotropies are modeled using a blackbody correction factor. The flux density is:
 
-CMB anisotropies are modeled using the Planck blackbody correction:
+  $$S(\nu) = \frac{2 k \cdot \nu^2 \cdot \Delta T \cdot \Omega}{c^2} \cdot \text{PlanckCorr}(\nu) \cdot 10^{26}$$
 
-$$S(\nu) = \frac{2 k \cdot \nu^2 \cdot \Delta T \cdot \Omega}{c^2} \cdot \text{PlanckCorr}(\nu) \cdot 10^{26}$$
+  where the Planck correction factor is:
 
-The Planck correction factor is:
+  $$\text{PlanckCorr}(\nu) = \frac{x^2 e^x}{(e^x - 1)^2}, \quad x = \frac{h \nu}{k T_{\text{CMB}}}$$
 
-$$\text{PlanckCorr}(\nu) = \frac{x^2 e^x}{(e^x - 1)^2}, \, x = \frac{h \nu}{k T_{\text{CMB}}}$$
+  and:
+  - $\Delta T$: Temperature fluctuation ($\mu$K)
+  - $T_{\text{CMB}} = 2.725$: CMB temperature (K)
+  - $\nu$: Frequency (GHz)
+  - $\Omega$: Beam solid angle (sr)
 
-where:
-- \(\Delta T\): Temperature fluctuation (\(\mu\)K)
-- \(T_{\text{CMB}} = 2.725\): CMB temperature (K)
-- \(\nu\): Frequency (GHz)
+  ---
 
+  ### Thermal Dust Emission
 
-### 5. **Thermal Dust Emission**
+  Thermal dust emission is modeled using a modified blackbody spectrum:
 
-Thermal dust emission is modeled using a modified blackbody spectrum:
+  $$S(\nu) = \frac{2 h \nu^3}{c^2} \cdot \frac{1}{e^{\frac{h \nu}{k T_d}} - 1} \cdot \tau_{353} \cdot \left(\frac{\nu}{353}\right)^{\beta} \cdot \Omega \cdot 10^{26}$$
 
-$$S(\nu) = \frac{2 h \nu^3}{c^2} \cdot \frac{1}{e^{\frac{h \nu}{k T_d}} - 1} \cdot \tau_{353} \cdot \left(\frac{\nu}{353}\right)^{\beta} \cdot \Omega \cdot 10^{26}$$
+  where:
+  - $T_d$: Dust temperature (K)
+  - $\tau_{353}$: Optical depth at $353$ GHz
+  - $\beta$: Dust emissivity index
+  - $\nu$: Frequency (GHz)
+  - $\Omega$: Beam solid angle (sr)
 
-where:
-- \(T_d\): Dust temperature (K)
-- \(\tau_{353}\): Optical depth at 353 GHz
-- \(\beta\): Dust emissivity index
-- \(\nu\): Frequency (GHz)
-- \(\Omega\): Beam solid angle (sr)
+  ---
 
+  Each emission model is implemented in Python functions within `emission.py`. You can integrate or modify them to suit your specific SED fitting requirements.
 
- ---
+   ---
 
  ## **Utility Functions**
 
