@@ -15,19 +15,7 @@ A Python-based tool for fitting Spectral Energy Distribution (SED) models using 
 
 ## **Dependencies**
 This package requires the following Python libraries:
-- `emcee`
-- `healpy`
-- `numpy`
-- `datetime`
-- `time`
-- `sys`
-- `inspect`
-- `multiprocessing`
-- `warnings`
-- `lmfit`
-- `matplotlib`
-- `corner`
-- `os`
+- `emcee`, `healpy`, `numpy`, `datetime`, `time`, `sys`, `inspect`, `multiprocessing`, `warnings`, `lmfit`, `matplotlib`, `corner`, `os`
 
 Install these dependencies using `pip` or `conda`.
 
