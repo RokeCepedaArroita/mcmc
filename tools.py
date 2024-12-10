@@ -845,12 +845,23 @@ class SED():
                     residuals.append((self.data['flux'][i] - ymodel_point)/self.data['flux_err'][i])
 
             ax1.set_xscale('log')
-            #ax1.set_yscale('log')
             ax1.plot([np.min(self.data['nu'])/2.,sed_upper_x_limit], [0,0], color='k', lw=1, alpha=0.8)
+            # Add a grey band to highlight the ±1 sigma range
+            ax1.fill_between(
+                [np.min(self.data['nu']) / 2., sed_upper_x_limit],  # x-range
+                -1,  # Lower y-limit
+                1,   # Upper y-limit
+                color='#0072bd',
+                alpha=0.05,  # Transparency
+                edgecolor='none',  # Disable edge lines
+                zorder=0    # Ensure it's behind other plot elements
+            )
             ax1.set_xlabel('Frequency (GHz)')
             ax1.set_ylabel(r'$\Delta\sigma$')
             ax1.set_xlim([np.min(self.data['nu'])/2.,sed_upper_x_limit])
             ax1.set_ylim([-np.max(np.abs(residuals_fitted))*1.5,np.max(np.abs(residuals_fitted))*1.5])
+
+
 
 
             # Remove vertical gap between subplots
@@ -877,6 +888,9 @@ class SED():
             else:
                 plt.savefig(self.settings['plotting']['plotdir']+'/'+save_name+'.png', dpi=self.settings['plotting']['dpi'], bbox_inches='tight', pad_inches=0)
 
+            # Suppress the specific warning
+            import warnings
+            warnings.filterwarnings("ignore", message=".*Attempt to set non-positive xlim.*")
 
             plt.clf()
             plt.close(1)
@@ -978,9 +992,6 @@ class SED():
         if self.settings['plotting']['plotCorner']:
 
             plt.figure(3)
-
-
-            # TODO: Turn off extremely annoying warnings
 
             fig = corner.corner(self.mcmc_chain['samples'], labels=self.model['sed_names_latex'],
                 #range=[[10, 30], [-5, -2],[1.2,2.1],[0,1000], [0,30],[20,35],[0.3,0.9]],\
