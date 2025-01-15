@@ -348,15 +348,29 @@ class SED():
 
         def lnprior(theta):
             '''
-            Prior function
+            Prior function with Gaussian prior for dT parameter if it exists
             '''
-
+            # First check if parameters are within basic bounds
             all_within_priors = self.check_priors(theta)
+            if not all_within_priors:
+                return -np.inf
 
-            if all_within_priors: # if priors satisfied
-                return 0.0
+            # Initialize prior to 0.0 (for uniform prior case)
+            lnp = 0.0
 
-            return -np.inf # if priors not satisfied
+            # Only apply Gaussian prior if dT exists in parameters
+            try:
+                dT_idx = self.model['sed_names'].index('dT')
+                # Gaussian prior parameters for dT
+                dT_mean = 0.0
+                dT_std = 32.3
+                # Add Gaussian prior contribution for dT
+                lnp += -0.5 * ((theta[dT_idx] - dT_mean) / dT_std)**2
+            except ValueError:
+                # dT not in parameters, just use uniform prior
+                pass
+
+            return lnp
 
 
 
@@ -852,7 +866,7 @@ class SED():
                 -1,  # Lower y-limit
                 1,   # Upper y-limit
                 color='#0072bd',
-                alpha=0.05,  # Transparency
+                alpha=0.05*2,  # Transparency
                 edgecolor='none',  # Disable edge lines
                 zorder=0    # Ensure it's behind other plot elements
             )
