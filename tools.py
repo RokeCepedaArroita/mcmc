@@ -604,7 +604,7 @@ class SED():
         for i in range(ndim): # for all parameters
 
             # Get Lower 1-sigma, 50% and Upper 1-sigma Quantiles
-            mcmc = corner.quantile(samples[:,i], [0.170675, 0.5, 0.829325]) # get 1 sigma range
+            mcmc = corner.quantile(samples[:,i], [0.1586552539314571, 0.5, 0.8413447460685429]) # get 1 sigma range
 
             # Assign 50% Quantile as Final Parameter
             self.model['sed_params'][i] = mcmc[1]
